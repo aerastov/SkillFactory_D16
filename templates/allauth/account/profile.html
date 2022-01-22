@@ -1,0 +1,22 @@
+{% extends 'default.html' %}
+{% load bootstrap4 %}
+{% block title %}Profile{% endblock %}
+
+
+{% block content %}
+
+    <br><br>
+    <h3>Ваш профиль: </h3>
+    <br>
+    <h5>User name: {{user.username}}</h5>
+    <h5>Last name: {{user.last_name}}</h5>
+    <h5>First name: {{user.first_name}}</h5>
+    <h5>E-mail: {{user.email}}</h5>
+
+
+    <br> <br>
+    <a class="btn btn-secondary" href="{% url 'account_edit' %}" role="button">Изменить даные</a>
+    <br><br>
+    <a class="btn btn-secondary" href="{% url 'account_logout' %}" role="button">Выйти из аккаунта</a>
+
+{% endblock %}
