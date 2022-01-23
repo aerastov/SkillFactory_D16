@@ -38,16 +38,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Setting for allauth
 
     'board',
     'bootstrap4',
-    'django.contrib.sites',  # Setting for allauth
     'allauth',  # Setting for allauth
     'allauth.account',  # Setting for allauth
     'allauth.socialaccount',  # Setting for allauth
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 SITE_ID = 1
+
+CKEDITOR_CONFIGS = {
+    'awesome_ckeditor': {
+        'toolbar': 'Basic',
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,7 +72,7 @@ ROOT_URLCONF = 'MMORPG_board.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'templates', 'allauth')],  # Setting for allauth
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'templates', 'allauth')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -142,6 +150,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+MEDIA_ROOT = 'media/'  # Путь где хранятся файлы
+MEDIA_URL = '/media/'  # Ссылка по которой будет обращение от основного хоста
+CKEDITOR_UPLOAD_PATH = 'media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

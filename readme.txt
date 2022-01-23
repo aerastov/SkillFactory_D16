@@ -7,7 +7,8 @@ Django version 4.0.1
 # pip install django-bootstrap4
 2. Установить пакет allauth
 # pip install django-allauth
-
+3. Установить ckeditor
+pip install django-ckeditor
 
 
 

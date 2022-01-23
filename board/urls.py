@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import Index, AccountProfile, UpdateProfile
 from django.shortcuts import redirect
+
+from .views import Index, AccountProfile, UpdateProfile
 
 
 urlpatterns = [
