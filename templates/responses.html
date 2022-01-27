@@ -1,0 +1,25 @@
+{% extends 'default.html' %}
+
+{% block title %}Responses{% endblock title %}
+
+{% block content %}
+    <br><br>
+    {% if responses %}
+        {% for response in responses %}
+            <a href="/post/{{ response.id }}" style="font-size: 20px;"><b>{{ response.title }}</b></a><br>
+            <span style="font-size: 12px;"><b>Автор:  {{ response.author.user.last_name }} {{ response.author.user.first_name }} |
+                дата публикации: {{ response.dateCreation|date:'d.M.Y' }} г.</b></span>
+
+            <br>{{ response.text|truncatechars:1000}}<br><br>
+
+        {% endfor %}
+    {% else %}
+        <br><br>
+        <h2>Откликов нет!</h2>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <br>
+        <a class="btn btn-secondary" href="{% url 'create_ad' %}" role="button">Написать объявление</a>
+    {% endif %}
+{% endblock content %}

@@ -1,78 +1,25 @@
 {% extends 'default.html' %}
 
-{% block title %}
-News
-{% endblock title %}
+{% block title %}Ads{% endblock title %}
 
 {% block content %}
-  <style>
-   a {color: black; text-decoration: none;}
-   a:visited {color: black /* Цвет посещенной ссылки */}
-   a:hover {color: blue; /* Цвет ссылки при наведении */}
-  </style>
-    <h1>Все статьи и новости:</h1>
-        <span style ="color: grey;">Общее количество всех публикаций на сайте: {{ paginator.count }}</span><br>
-        <span style ="color: grey;">Выведено по {{ list_in_page }} публикаций на странице, всего страниц: {{ paginator.num_pages }}</span>
-    <hr>
-    {% if news %}
-        {% for itemnews in news %}
+    <br><br>
+    {% if posts %}
+        {% for post in posts %}
+            <a href="/post/{{ post.id }}" style="font-size: 20px;"><b>{{ post.title }}</b></a><br>
+            <span style="font-size: 12px;"><b>Автор:  {{ post.author.user.last_name }} {{ post.author.user.first_name }} |
+                дата публикации: {{ post.dateCreation|date:'d.M.Y' }} г.</b></span>
 
-            {% autoescape off %}
-            <a href="{{ itemnews.id }}" style="font-size: 20px;"><b>{{ itemnews.title }}</b></a><br>
-            {% endautoescape %}
-            {% for key, value in itemnews.CATEGORY_CHOICES %}
-                {% if key == itemnews.categoryType %}
-                    <span><b>{{value}}</b>,</span>
-                {% endif %}
-            {% endfor %}
-            <span>дата публикации: {{ itemnews.dateCreation|date:'d.M.Y' }}, рейтинг: {{ itemnews.rating }} ({{ itemnews.author }})</span></br>
-            <span>Категория: </span>
-            {% for category in itemnews.postCategory.all %}
-                <span>{{ category.name}} </span>
-            {% endfor %}
-            {% autoescape off %}
-            <br>{{ itemnews.text|truncatechars:50}}<br><br>
-            <!--  </br>{{ itemnews.text|truncatewords:20 }}</br></br> -->
-            {% endautoescape %}
+            <br>{{ post.text|truncatechars:1000|safe}}<br><br>
+
         {% endfor %}
     {% else %}
-        <h2>Новостей нет!</h2>
+        <br><br>
+        <h2>Публикаций нет!</h2>
     {% endif %}
 
-    <hr>
-
-
-<!-- Проверяем что поддерживается постраничный вывод -->
-{% if is_paginated %}
-<span>Страницы: </span>
-    <!-- Если доступна предыдущая страница, то даём ссылку на неё и самую первую страницу -->
-    {% if page_obj.has_previous %}
-        <a href="?page=1">Первая</a><span>&nbsp;</span>
-        <a href="?page={{ page_obj.previous_page_number }}"><</a>
+    {% if user.is_authenticated %}
+        <br>
+        <a class="btn btn-secondary" href="{% url 'create_ad' %}" role="button">Написать объявление</a>
     {% endif %}
-
-    <!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
-    {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-            <a><b>{{ page_obj.number }}</b></a><span>&nbsp;</span>
-        {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
-            <a href="?page={{ num }}">{{ num }}</a><span>&nbsp;</span>
-        {% endif %}
-    {% endfor %}
-
-    <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">></a><span>&nbsp;</span>
-        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
-    {% endif %}
-  <span style ="color: grey;">&nbsp;&nbsp;(Показаны публикации с {{ page_obj.start_index }} по {{ page_obj.end_index }})</span>
-{% endif %}
-<br><br>
-
-    <a href="/news/add"> <b class="btn btn-secondary"> Добавить новую публикацию </b></a>
-
-<br><br>
-
-
-
 {% endblock content %}

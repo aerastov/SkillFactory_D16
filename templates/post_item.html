@@ -1,0 +1,34 @@
+{% extends 'default.html' %}
+
+{% block title %}Ad{% endblock title %}
+
+{% block content %}
+    {% autoescape off %}
+    <h2>{{ post.title }}</h2>
+    <span>{{ post.text }}<br></span>
+    {% endautoescape %}
+
+    <hr>
+
+    <span>дата публикации: {{ post.dateCreation|date:'d-M-Y f' }}, ({{ post.author }})</span><br>
+    <span>Категория: {{ post.get_category_display }}</span>
+
+    <br><br>
+
+    <input type=button value="<< Назад" class="btn btn-secondary" onClick="javascript:history.go(-1);">
+    <a class="btn btn-secondary" href="/post/{{ post.id }}/edit" role="button">Редактировать</a>
+    <a class="btn btn-secondary" href="/post/{{ post.id }}/delete" role="button">Удалить</a>
+
+    {% if user.is_authenticated %}
+    <br><br>
+        {% if respond == "False" %}
+            <a class="btn btn-secondary" href="/respond/{{ post.id }}" role="button">Откликнуться</a>
+        {% else %}
+            <a>Вы откликнулись на это объявление.</a><br>
+            <a href="{% url 'responses' %}">Посмотреть свои отклики</a>
+        {% endif %}
+    {% endif %}
+
+{% endblock content %}
+
+
