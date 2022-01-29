@@ -10,6 +10,7 @@ urlpatterns = [
   path('create_ad', CreatePost.as_view(), name='create_ad'),
   path('post/<int:pk>/edit', EditPost.as_view()),
   path('post/<int:pk>/delete', DeletePost.as_view()),
+  # path('responses', responses, name='responses'),
   path('responses', Responses.as_view(), name='responses'),
   path('respond/<int:pk>', Respond.as_view(), name='respond'),
   path('', lambda request: redirect('index', permanent=False)),

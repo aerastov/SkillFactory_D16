@@ -27,3 +27,4 @@ class Response(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Текст')
     status = models.BooleanField(default=False)
+    dateCreation = models.DateTimeField(auto_now_add=True)

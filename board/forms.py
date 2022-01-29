@@ -11,10 +11,9 @@ class EditProfile(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    # text = forms.CharField(widget=CKEditorWidget(config_name='default'))
-    # text = forms.CharField(widget=CKEditorWidget, label='')
     class Meta:
         model = Post
+        widgets = {'title': forms.TextInput(attrs={'size': '100'})}
         fields = ('category', 'title', 'text',)
 
     def __init__(self, *args, **kwargs):
@@ -32,3 +31,23 @@ class RespondForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(RespondForm, self).__init__(*args, **kwargs)
         self.fields['text'].label = "Текст отклика:"
+
+
+# class ResponsesFilterForm(forms.Form):
+#
+#     title = forms.ModelChoiceField(
+#         label='Объявление',
+#         queryset=Post.objects.filter(author_id=2).order_by('-dateCreation').values_list('title', flat=True),
+#         empty_label="Все",
+#         required=False
+#     )
+
+class ResponsesFilterForm(forms.Form):
+    def __init__(self, user, *args, **kwargs):
+        super(ResponsesFilterForm, self).__init__(*args, **kwargs)
+        self.fields['title'] = forms.ModelChoiceField(
+            label='Объявление',
+            queryset=Post.objects.filter(author_id=user.id).order_by('-dateCreation').values_list('title', flat=True),
+            empty_label="Все",
+            required=False
+        )

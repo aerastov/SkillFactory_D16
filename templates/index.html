@@ -7,10 +7,10 @@
     {% if posts %}
         {% for post in posts %}
             <a href="/post/{{ post.id }}" style="font-size: 20px;"><b>{{ post.title }}</b></a><br>
-            <span style="font-size: 12px;"><b>Автор:  {{ post.author.user.last_name }} {{ post.author.user.first_name }} |
-                дата публикации: {{ post.dateCreation|date:'d.M.Y' }} г.</b></span>
+            <span style="font-size: 12px;"><b>Автор:  {{ post.author }} |
+                Дата публикации: {{ post.dateCreation|date:'d.M.Y' }} г.</b></span><br><br>
 
-            <br>{{ post.text|truncatechars:1000|safe}}<br><br>
+
 
         {% endfor %}
     {% else %}
@@ -19,7 +19,7 @@
     {% endif %}
 
     {% if user.is_authenticated %}
-        <br>
-        <a class="btn btn-secondary" href="{% url 'create_ad' %}" role="button">Написать объявление</a>
+        <br><br><br>
+        <a class="btn btn-secondary" href="{% url 'create_ad' %}" role="button">Добавить новое объявление</a>
     {% endif %}
 {% endblock content %}

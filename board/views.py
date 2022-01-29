@@ -1,13 +1,14 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, UpdateView, TemplateView, CreateView, DetailView, DeleteView
-from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import ListView, UpdateView, TemplateView, CreateView, DetailView, DeleteView, FormView
+from django.views.generic.edit import FormMixin
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.http import HttpResponse
 
 from .models import Post, Response
-from .forms import EditProfile, PostForm, RespondForm
+from .forms import EditProfile, PostForm, RespondForm, ResponsesFilterForm
 
 
 class Index(ListView):
@@ -23,9 +24,9 @@ class PostItem(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if Response.objects.filter(author_id=self.request.user.id).filter(post_id=self.kwargs.get('pk')):
-            context['respond'] = "True"
-        else:
-            context['respond'] = "False"
+            context['respond'] = "Откликнулся"
+        elif self.request.user == Post.objects.get(pk=self.kwargs.get('pk')).author:
+            context['respond'] = "Мое_объявление"
         return context
 
 
@@ -81,10 +82,66 @@ class DeletePost(LoginRequiredMixin, DeleteView):
             # raise Http404
 
 
+# def responses(request):
+#     form = ResponsesFilterForm()
+#     context = {'form': form}
+#     # form = list(Post.objects.filter(author_id=request.user).order_by('-dateCreation'))
+#     return render(request, 'responses.html', context)
+
+
 class Responses(ListView):
     model = Response
     template_name = 'responses.html'
     context_object_name = 'responses'
+
+    def get_context_data(self, **kwargs):
+        context = super(Responses, self).get_context_data(**kwargs)
+        title = self.request.POST.get('title')
+        context['form'] = ResponsesFilterForm(self.request.user, initial={'title': title})
+        context['title'] = title
+        if title:
+            post_id = Post.objects.get(title=title)
+            context['filter_responses'] = list(Response.objects.filter(post_id=post_id).order_by('-dateCreation'))
+        else:
+            context['filter_responses'] = list(Response.objects.filter(post_id__author_id=self.request.user).order_by('-dateCreation'))
+        context['myresponses'] = list(Response.objects.filter(author_id=self.request.user).order_by('-dateCreation'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        # context = super(Responses, self).get_context_data(**kwargs)
+        # context['form'] = self.get_form()
+        return self.get(request, *args, **kwargs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Respond(LoginRequiredMixin, CreateView):
