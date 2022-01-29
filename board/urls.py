@@ -1,7 +1,8 @@
 from django.urls import path
 from django.shortcuts import redirect
 
-from .views import Index, AccountProfile, UpdateProfile, CreatePost, PostItem, EditPost, DeletePost, Responses, Respond
+from .views import Index, AccountProfile, UpdateProfile, CreatePost, PostItem, EditPost, DeletePost, Responses, \
+  Respond, response_accept, response_delete
 
 
 urlpatterns = [
@@ -13,6 +14,8 @@ urlpatterns = [
   # path('responses', responses, name='responses'),
   path('responses', Responses.as_view(), name='responses'),
   path('respond/<int:pk>', Respond.as_view(), name='respond'),
+  path('response/accept/<int:pk>', response_accept),
+  path('response/delete/<int:pk>', response_delete),
   path('', lambda request: redirect('index', permanent=False)),
   path('accounts/profile', AccountProfile.as_view(), name='account_profile'),
   path('accounts/edit', UpdateProfile.as_view(), name='account_edit'),

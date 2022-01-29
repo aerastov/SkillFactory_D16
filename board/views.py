@@ -88,7 +88,7 @@ class DeletePost(LoginRequiredMixin, DeleteView):
 #     # form = list(Post.objects.filter(author_id=request.user).order_by('-dateCreation'))
 #     return render(request, 'responses.html', context)
 
-
+title = str("")
 class Responses(ListView):
     model = Response
     template_name = 'responses.html'
@@ -96,32 +96,41 @@ class Responses(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(Responses, self).get_context_data(**kwargs)
-        title = self.request.POST.get('title')
+        global title
         context['form'] = ResponsesFilterForm(self.request.user, initial={'title': title})
         context['title'] = title
         if title:
             post_id = Post.objects.get(title=title)
             context['filter_responses'] = list(Response.objects.filter(post_id=post_id).order_by('-dateCreation'))
+            context['response_post_id'] = post_id.id
         else:
             context['filter_responses'] = list(Response.objects.filter(post_id__author_id=self.request.user).order_by('-dateCreation'))
         context['myresponses'] = list(Response.objects.filter(author_id=self.request.user).order_by('-dateCreation'))
         return context
 
     def post(self, request, *args, **kwargs):
-        # context = super(Responses, self).get_context_data(**kwargs)
-        # context['form'] = self.get_form()
+        global title
+        title = self.request.POST.get('title')
         return self.get(request, *args, **kwargs)
 
 
+def response_accept(request, **kwargs):
+    if request.user.is_authenticated:
+        response = Response.objects.get(id=kwargs.get('pk'))
+        response.status = True
+        response.save()
+        return HttpResponseRedirect('/responses')
+    else:
+        return HttpResponseRedirect('/accounts/login')
 
 
-
-
-
-
-
-
-
+def response_delete(request, **kwargs):
+    if request.user.is_authenticated:
+        response = Response.objects.get(id=kwargs.get('pk'))
+        response.delete()
+        return HttpResponseRedirect('/responses')
+    else:
+        return HttpResponseRedirect('/accounts/login')
 
 
 

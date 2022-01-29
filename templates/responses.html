@@ -14,7 +14,7 @@
 
     {% if title %}
         <h3>Oтклики на мое объявление</h3>
-        <a href="/post/{{ response.post_id }}" style="font-size: 20px;"><b>{{ title }}:</b></a><br>
+        <a href="/post/{{ response_post_id }}" style="font-size: 20px;"><b>{{ title }}:</b></a><br>
     {% if filter_responses %}
         {% for response in filter_responses %}
             <a><b>Отклик: </b></a>{{ response.text }}<br>
