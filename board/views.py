@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 
 from .models import Post, Response
-from .forms import EditProfile, PostForm, RespondForm, ResponsesFilterForm
+from .forms import PostForm, RespondForm, ResponsesFilterForm
 
 
 class Index(ListView):
@@ -34,6 +34,12 @@ class CreatePost(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'create_post.html'
     form_class = PostForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.request.user.has_perm('board.add_post'):
+        # if not self.request.user.has_perm('blog.add_post'):
+            return HttpResponseRedirect(reverse('account_profile'))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -89,6 +95,8 @@ class DeletePost(LoginRequiredMixin, DeleteView):
 #     return render(request, 'responses.html', context)
 
 title = str("")
+
+
 class Responses(ListView):
     model = Response
     template_name = 'responses.html'
@@ -188,27 +196,12 @@ art.upload.name # Имя файла
 
 
 
-
-
-class AccountProfile(LoginRequiredMixin, TemplateView):
-    template_name = 'allauth/account/profile.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class UpdateProfile(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = EditProfile
-    success_url = '/accounts/profile'
-    template_name = 'allauth/account/update_profile.html'
-
-    def setup(self, request, *args, **kwargs):
-        self.user_id = request.user.pk
-        return super().setup(request, *args, **kwargs)
-
-    def get_object(self, queryset=None):
-        if not queryset:
-          queryset = self.get_queryset()
-        return get_object_or_404(queryset, pk=self.user_id)
+# Пользователи нашего ресурса должны иметь возможность зарегистрироваться в нём по e-mail, получив
+# письмо с кодом подтверждения регистрации. После регистрации им становится доступно создание и редактирование
+# объявлений. Объявления состоят из заголовка и текста, внутри которого могут быть картинки, встроенные видео и
+# другой контент. При отправке отклика пользователь должен получить e-mail с оповещением о нём. Также пользователю должна
+# быть доступна приватная страница с откликами на его объявления, внутри которой он может фильтровать отклики по
+# объявлениям, удалять их и принимать (при принятии отклика пользователю, оставившему отклик, также должно прийти
+# уведомление).
+#
+# Также мы бы хотели иметь возможность отправлять пользователям новостные рассылки.

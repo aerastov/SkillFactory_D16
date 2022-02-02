@@ -1,13 +1,5 @@
 from django import forms
-from django.contrib.auth.models import User
-
 from .models import Post, Response
-from ckeditor.widgets import CKEditorWidget
-
-class EditProfile(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name', 'last_name')
 
 
 class PostForm(forms.ModelForm):
@@ -32,15 +24,6 @@ class RespondForm(forms.ModelForm):
         super(RespondForm, self).__init__(*args, **kwargs)
         self.fields['text'].label = "Текст отклика:"
 
-
-# class ResponsesFilterForm(forms.Form):
-#
-#     title = forms.ModelChoiceField(
-#         label='Объявление',
-#         queryset=Post.objects.filter(author_id=2).order_by('-dateCreation').values_list('title', flat=True),
-#         empty_label="Все",
-#         required=False
-#     )
 
 class ResponsesFilterForm(forms.Form):
     def __init__(self, user, *args, **kwargs):

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',  # Setting for allauth
 
     'board',
+    'accounts',
     'bootstrap4',
     'allauth',  # Setting for allauth
     'allauth.account',  # Setting for allauth
@@ -120,7 +121,7 @@ ROOT_URLCONF = 'MMORPG_board.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'templates', 'allauth')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'accounts', 'templates', 'allauth')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -146,6 +147,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 
 WSGI_APPLICATION = 'MMORPG_board.wsgi.application'
@@ -211,13 +213,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
-ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/confirm-email/"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/profile"
 
 EMAIL_HOST_USER = "newsportal272@gmail.com"
-EMAIL_HOST_PASSWORD = "ynxgvzzvhffglfmw"
+# EMAIL_HOST_PASSWORD = "DkjhJsgdaGHjsjjLlkja2133623"
+EMAIL_HOST_PASSWORD = "octumypgqjnuucnt"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
