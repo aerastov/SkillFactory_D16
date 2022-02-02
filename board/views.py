@@ -1,20 +1,35 @@
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, UpdateView, TemplateView, CreateView, DetailView, DeleteView, FormView
-from django.views.generic.edit import FormMixin
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponseRedirect, Http404
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView, UpdateView, CreateView, DetailView, DeleteView, FormView
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from django.http import HttpResponse
+from django.core.mail import send_mail
 
 from .models import Post, Response
 from .forms import PostForm, RespondForm, ResponsesFilterForm
+
+
+@login_required
+def sent_mail(request, subject, message, recipient_list):
+    user = User.objects.get(user=request.user)
+
+    send_mail(
+        subject=f'MMORPG Billboard',
+        message=f'Доброго дня, {request.user}! Для подтверждения регистрации, введите код {user.code} на '
+                f'странице регистрации\nhttp://127.0.0.1:8000/accounts/profile',
+        from_email='newsportal272@gmail.com',
+        recipient_list=[request.user.email, ],
+    )
+    return HttpResponseRedirect(reverse('account_profile'))
 
 
 class Index(ListView):
     model = Post
     template_name = 'index.html'
     context_object_name = 'posts'
+
 
 class PostItem(DetailView):
     model = Post
@@ -37,7 +52,6 @@ class CreatePost(LoginRequiredMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not self.request.user.has_perm('board.add_post'):
-        # if not self.request.user.has_perm('blog.add_post'):
             return HttpResponseRedirect(reverse('account_profile'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -52,7 +66,8 @@ class CreatePost(LoginRequiredMixin, CreateView):
         return redirect(f'/post/{post.id}')
 
 
-class EditPost(LoginRequiredMixin, UpdateView):
+class EditPost(PermissionRequiredMixin, UpdateView):
+    permission_required = 'board.change_post'
     template_name = 'edit_post.html'
     form_class = PostForm
     success_url = '/create/'
@@ -62,8 +77,7 @@ class EditPost(LoginRequiredMixin, UpdateView):
         if self.request.user.username == 'admin' or self.request.user.username == author:
             return super().dispatch(request, *args, **kwargs)
         else:
-            return HttpResponse("Редактировать объявление может только автор")
-            # raise Http404
+            return HttpResponse("Редактировать объявление может только его автор")
 
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
@@ -74,7 +88,8 @@ class EditPost(LoginRequiredMixin, UpdateView):
         return HttpResponseRedirect('/post/' + str(self.kwargs.get('pk')))
 
 
-class DeletePost(LoginRequiredMixin, DeleteView):
+class DeletePost(PermissionRequiredMixin, DeleteView):
+    permission_required = 'board.delete_post'
     template_name = 'delete_post.html'
     queryset = Post.objects.all()
     success_url = '/index'
@@ -84,8 +99,8 @@ class DeletePost(LoginRequiredMixin, DeleteView):
         if self.request.user.username == 'admin' or self.request.user.username == author:
             return super().dispatch(request, *args, **kwargs)
         else:
-            return HttpResponse("Удалить объявление может только автор")
-            # raise Http404
+            return HttpResponse("Удалить объявление может только его автор")
+
 
 
 # def responses(request):
@@ -97,7 +112,7 @@ class DeletePost(LoginRequiredMixin, DeleteView):
 title = str("")
 
 
-class Responses(ListView):
+class Responses(LoginRequiredMixin, ListView):
     model = Response
     template_name = 'responses.html'
     context_object_name = 'responses'
@@ -122,6 +137,7 @@ class Responses(ListView):
         return self.get(request, *args, **kwargs)
 
 
+@login_required
 def response_accept(request, **kwargs):
     if request.user.is_authenticated:
         response = Response.objects.get(id=kwargs.get('pk'))
@@ -132,6 +148,7 @@ def response_accept(request, **kwargs):
         return HttpResponseRedirect('/accounts/login')
 
 
+@login_required
 def response_delete(request, **kwargs):
     if request.user.is_authenticated:
         response = Response.objects.get(id=kwargs.get('pk'))
@@ -139,26 +156,6 @@ def response_delete(request, **kwargs):
         return HttpResponseRedirect('/responses')
     else:
         return HttpResponseRedirect('/accounts/login')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class Respond(LoginRequiredMixin, CreateView):
@@ -190,18 +187,7 @@ art.upload.name # Имя файла
 
 
 
-
-
-
-
-
-
-# Пользователи нашего ресурса должны иметь возможность зарегистрироваться в нём по e-mail, получив
-# письмо с кодом подтверждения регистрации. После регистрации им становится доступно создание и редактирование
-# объявлений. Объявления состоят из заголовка и текста, внутри которого могут быть картинки, встроенные видео и
-# другой контент. При отправке отклика пользователь должен получить e-mail с оповещением о нём. Также пользователю должна
-# быть доступна приватная страница с откликами на его объявления, внутри которой он может фильтровать отклики по
-# объявлениям, удалять их и принимать (при принятии отклика пользователю, оставившему отклик, также должно прийти
+# При отправке отклика пользователь должен получить e-mail с оповещением о нём.
+# (при принятии отклика пользователю, оставившему отклик, также должно прийти
 # уведомление).
-#
 # Также мы бы хотели иметь возможность отправлять пользователям новостные рассылки.
