@@ -12,6 +12,7 @@ urlpatterns = [
   path('post/<int:pk>/edit', EditPost.as_view()),
   path('post/<int:pk>/delete', DeletePost.as_view()),
   path('responses', Responses.as_view(), name='responses'),
+  path('responses/<int:pk>', Responses.as_view(), name='responses'),
   path('respond/<int:pk>', Respond.as_view(), name='respond'),
   path('response/accept/<int:pk>', response_accept),
   path('response/delete/<int:pk>', response_delete),

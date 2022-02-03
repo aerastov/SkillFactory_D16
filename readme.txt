@@ -18,7 +18,7 @@ brew install redis (MacOS)
 redis-server /usr/local/etc/redis.conf (Запустить сервер)
 8. Установить поддержку Redis в Celery
 # pip install -U "celery[redis]"
-# celery -A NewsPortal worker -l INFO -B # - команда запуска Celery
+# celery -A MMORPG_board worker -l INFO -B # - команда запуска Celery
 
 
 

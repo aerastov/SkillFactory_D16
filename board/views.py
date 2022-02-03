@@ -5,24 +5,10 @@ from django.views.generic import ListView, UpdateView, CreateView, DetailView, D
 from django.shortcuts import redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from django.core.mail import send_mail
 
 from .models import Post, Response
 from .forms import PostForm, RespondForm, ResponsesFilterForm
-
-
-@login_required
-def sent_mail(request, subject, message, recipient_list):
-    user = User.objects.get(user=request.user)
-
-    send_mail(
-        subject=f'MMORPG Billboard',
-        message=f'Доброго дня, {request.user}! Для подтверждения регистрации, введите код {user.code} на '
-                f'странице регистрации\nhttp://127.0.0.1:8000/accounts/profile',
-        from_email='newsportal272@gmail.com',
-        recipient_list=[request.user.email, ],
-    )
-    return HttpResponseRedirect(reverse('account_profile'))
+from .tasks import respond_send_email, respond_accept_send_email
 
 
 class Index(ListView):
@@ -102,13 +88,6 @@ class DeletePost(PermissionRequiredMixin, DeleteView):
             return HttpResponse("Удалить объявление может только его автор")
 
 
-
-# def responses(request):
-#     form = ResponsesFilterForm()
-#     context = {'form': form}
-#     # form = list(Post.objects.filter(author_id=request.user).order_by('-dateCreation'))
-#     return render(request, 'responses.html', context)
-
 title = str("")
 
 
@@ -120,6 +99,13 @@ class Responses(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(Responses, self).get_context_data(**kwargs)
         global title
+        """
+        Далее в условии - если пользователь попал на страницу через ссылку из письма, в которой содержится
+        ID поста для фильтра - фильтр работает по этому ID
+        """
+        if self.kwargs.get('pk') and Post.objects.filter(id=self.kwargs.get('pk')).exists():
+            title = str(Post.objects.get(id=self.kwargs.get('pk')).title)
+            print(title)
         context['form'] = ResponsesFilterForm(self.request.user, initial={'title': title})
         context['title'] = title
         if title:
@@ -134,6 +120,12 @@ class Responses(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         global title
         title = self.request.POST.get('title')
+        """
+        Далее в условии - При событии POST (если в пути открытой страницы есть ID) - нужно перезайти уже без этого ID
+        чтобы фильтр отрабатывал запрос уже из формы, так как ID, если он есть - приоритетный 
+        """
+        if self.kwargs.get('pk'):
+            return HttpResponseRedirect('/responses')
         return self.get(request, *args, **kwargs)
 
 
@@ -143,6 +135,7 @@ def response_accept(request, **kwargs):
         response = Response.objects.get(id=kwargs.get('pk'))
         response.status = True
         response.save()
+        respond_accept_send_email.delay(response_id=response.id)
         return HttpResponseRedirect('/responses')
     else:
         return HttpResponseRedirect('/accounts/login')
@@ -170,24 +163,9 @@ class Respond(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         respond = form.save(commit=False)
         respond.author = User.objects.get(id=self.request.user.id)
-        # return HttpResponse(self.kwargs.get('pk'))
         respond.post = Post.objects.get(id=self.kwargs.get('pk'))
         respond.save()
+        respond_send_email.delay(respond_id=respond.id)
         return redirect(f'/post/{self.kwargs.get("pk")}')
 
 
-"""
-art = Post.objects.first()
-art.upload.url # Полная ссылка до файла
-art.upload.path
-art.upload.name # Имя файла
-"""
-
-
-
-
-
-# При отправке отклика пользователь должен получить e-mail с оповещением о нём.
-# (при принятии отклика пользователю, оставившему отклик, также должно прийти
-# уведомление).
-# Также мы бы хотели иметь возможность отправлять пользователям новостные рассылки.
